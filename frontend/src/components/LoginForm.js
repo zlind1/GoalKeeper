@@ -2,12 +2,15 @@ import React from 'react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
 import { AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai';
 import AppContext from '../AppContext';
+import api from '../util/api';
 
 function LoginForm(props) {
   const {closeModal, newUser} = props;
 
   const context = React.useContext(AppContext);
-  const login = (user) => context.setData('user', user);
+  const login = (tokens) => {
+    context.setData(tokens);
+  }
 
   const [passwordShown, setPasswordShown] = React.useState(false);
   const togglePasswordShown = () => setPasswordShown(!passwordShown);
@@ -43,10 +46,40 @@ function LoginForm(props) {
     const passwordValue = password.current.value;
     if (checkErrors(usernameValue, passwordValue)) return;
     const user = {
-      username: usernameValue
+      username: usernameValue,
+      password: passwordValue
     };
-    login(user);
-    closeModal();
+    if (newUser) {
+      const response = await api.post('/signup', user);
+      if (response.ok) {
+        const tokens = {
+          accessToken: response.access_token,
+          refreshToken: response.refresh_token
+        };
+        login(tokens);
+        closeModal();
+      } else {
+        if (response.msg === 'Username taken') {
+          setUsernameError(response.msg);
+        }
+      }
+    } else {
+      const response = await api.post('/login', user);
+      if (response.ok) {
+        const tokens = {
+          accessToken: response.access_token,
+          refreshToken: response.refresh_token
+        };
+        login(tokens);
+        closeModal();
+      } else {
+        if (response.msg === 'User not found') {
+          setUsernameError(response.msg);
+        } else if (response.msg === 'Incorrect password') {
+          setPasswordError(response.msg);
+        }
+      }
+    }
   }
 
   return (

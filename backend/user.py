@@ -37,7 +37,6 @@ def login(username, password):
         response['msg'] = 'User not found'
     return response
 
-
 def signup(username, password):
     response = {
         'msg': ''

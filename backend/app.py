@@ -4,6 +4,8 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 
+from flask_cors import CORS
+
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import create_refresh_token
 from flask_jwt_extended import get_jwt_identity
@@ -13,6 +15,7 @@ from flask_jwt_extended import JWTManager
 import user
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)

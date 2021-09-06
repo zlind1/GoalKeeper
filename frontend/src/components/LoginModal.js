@@ -5,7 +5,10 @@ import LoginForm from './LoginForm';
 
 function LoginModal() {
   const context = React.useContext(AppContext);
-  const signout = () => context.setData('user', null);
+  const signout = () => context.setData({
+    accessToken: null,
+    refreshToken: null
+  });
 
   const [modalShown, setModalShown] = React.useState(false);
   const openModal = () => setModalShown(true);
@@ -16,8 +19,8 @@ function LoginModal() {
 
   return (
     <>
-      <Button onClick={context.user ? signout : openModal}>
-        {context.user ? 'Sign out' : 'Log in / Sign up'}
+      <Button onClick={context.accessToken ? signout : openModal}>
+        {context.accessToken ? 'Sign out' : 'Log in / Sign up'}
       </Button>
       <Modal show={modalShown} onHide={closeModal}>
         <Modal.Header closeButton>
