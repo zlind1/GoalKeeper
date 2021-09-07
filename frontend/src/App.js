@@ -1,6 +1,7 @@
 import React from 'react';
 import AppContext from './AppContext';
 import LoginModal from './components/LoginModal';
+import GoalList from './components/GoalList';
 
 function App() {
   const localData = (key) => {
@@ -30,12 +31,7 @@ function App() {
   return (
     <AppContext.Provider value={context}>
       <LoginModal/>
-      <p>
-        {context.accessToken && `Access Token: ${context.accessToken}`}
-      </p>
-      <p>
-        {context.refreshToken && `Refresh Token: ${context.refreshToken}`}
-      </p>
+      {context.accessToken && <GoalList/>}
     </AppContext.Provider>
   );
 }

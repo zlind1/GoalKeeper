@@ -17,6 +17,9 @@ function LoginForm(props) {
 
   const username = React.createRef();
   const password = React.createRef();
+  const focusUsername = () => {
+    username.current.focus();
+  }
 
   const [usernameError, setUsernameError] = React.useState('');
   const [passwordError, setPasswordError] = React.useState('');
@@ -39,6 +42,7 @@ function LoginForm(props) {
   }
 
   React.useEffect(() => resetErrors(), [newUser]);
+  React.useEffect(() => focusUsername());
 
   const submitForm = async (e) => {
     e.preventDefault();

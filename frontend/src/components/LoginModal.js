@@ -10,12 +10,15 @@ function LoginModal() {
     refreshToken: null
   });
 
-  const [modalShown, setModalShown] = React.useState(false);
-  const openModal = () => setModalShown(true);
-  const closeModal = () => setModalShown(false);
-
   const [newUser, setNewUser] = React.useState(false);
   const toggleNewUser = () => setNewUser(!newUser);
+
+  const [modalShown, setModalShown] = React.useState(false);
+  const openModal = () => setModalShown(true);
+  const closeModal = () => {
+    setModalShown(false);
+    setNewUser(false);
+  }
 
   return (
     <>
