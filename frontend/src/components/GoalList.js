@@ -2,45 +2,50 @@ import React from 'react';
 import { ListGroup, Form } from 'react-bootstrap';
 import AppContext from '../AppContext';
 import Goal from './Goal';
+import api from '../util/api';
 
 function GoalList() {
   const context = React.useContext(AppContext);
   const [goals, setGoals] = React.useState([]);
-  const newGoal = React.createRef();
+  const newGoalInput = React.createRef();
 
-  const addGoal = (e) => {
+  const reloadGoals = async () => {
+    const response = await api.get('/goals', context.accessToken);
+    console.log(response);
+    setGoals(response.goals);
+  }
+
+  const addGoal = async (e) => {
     e.preventDefault();
-    const newGoalList = [...goals];
-    newGoalList.push({
-      id: newGoalList.length,
-      name: newGoal.current.value,
+    const newGoal = {
+      title: newGoalInput.current.value,
       completed: false
-    });
-    setGoals(newGoalList);
-    newGoal.current.value = '';
+    }
+    await api.post('/goals', newGoal, context.accessToken);
+    reloadGoals();
+    newGoalInput.current.value = '';
   }
 
-  const toggleCompleted = (goalID) => {
-    const newGoalList = [...goals];
-    for (const goal of newGoalList) {
-      if (goal.id === goalID) {
-        goal.completed = !goal.completed;
-        break;
-      }
-    }
-    setGoals(newGoalList);
+  const updateGoal = async (goal) => {
+    delete goal.username;
+    await api.put('/goals', goal, context.accessToken);
+    reloadGoals();
   }
+
+  React.useEffect(() => {
+    reloadGoals();
+  });
 
   return (
     <ListGroup>
       {goals.map((goal, i) => (
         <ListGroup.Item key={i}>
-          <Goal goal={goal} toggleCompleted={toggleCompleted}/>
+          <Goal goal={goal} updateGoal={updateGoal}/>
         </ListGroup.Item>
       ))}
       <ListGroup.Item>
         <Form onSubmit={addGoal}>
-          <Form.Control placeholder='Add a new goal' ref={newGoal}/>
+          <Form.Control placeholder='Add a new goal' ref={newGoalInput}/>
         </Form>
       </ListGroup.Item>
     </ListGroup>

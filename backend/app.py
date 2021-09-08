@@ -52,7 +52,9 @@ def goals():
     if request.method == 'GET':
         username = get_jwt_identity()
         user_goals = goal.get_user_goals(username)
-        return jsonify(user_goals)
+        return jsonify({
+            'goals': user_goals
+        })
     elif request.method == 'POST':
         username = get_jwt_identity()
         title = request.json.get('title', None)
