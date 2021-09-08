@@ -1,5 +1,5 @@
 
-const endpointURL = 'http://localhost:5000';
+const endpointURL = 'https://zlind-goalkeeper.herokuapp.com';
 
 const api = {
   get: async (route, token=null) => {

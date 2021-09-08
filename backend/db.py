@@ -1,10 +1,18 @@
 import boto3
 from boto3.dynamodb.conditions import Attr
 
+import os
+
 endpoint_url = 'https://dynamodb.us-west-1.amazonaws.com'
 
 def open_db():
-    return boto3.resource('dynamodb', endpoint_url=endpoint_url, region_name='us-west-1')
+    return boto3.resource(
+        'dynamodb',
+        endpoint_url=endpoint_url,
+        region_name='us-west-1',
+        aws_access_key_id=os.environ.get('ACCESS_KEY'),
+        aws_secret_access_key=os.environ.get('SECRET_KEY')
+    )
 
 def create_table(tableName, primaryKey):
     dynamodb = open_db()
