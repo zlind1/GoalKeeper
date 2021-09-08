@@ -34,7 +34,7 @@ function GoalList() {
 
   React.useEffect(() => {
     reloadGoals();
-  });
+  }, []);
 
   return (
     <ListGroup>
