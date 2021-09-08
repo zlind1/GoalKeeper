@@ -8,6 +8,9 @@ def create_goal_table():
         'goal_id': 'S'
     })
 
+def delete_goal_table():
+    db.delete_table(tableName)
+
 def get_goal(goal_id):
     return db.get_item(tableName, {
         'goal_id': goal_id

@@ -8,6 +8,9 @@ def create_user_table():
         'username': 'S'
     })
 
+def delete_user_table():
+    db.delete_table(tableName)
+
 def get_user(username):
     return db.get_item(tableName, {
         'username': username

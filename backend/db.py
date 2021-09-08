@@ -28,6 +28,11 @@ def create_table(tableName, primaryKey):
         }
     )
 
+def delete_table(tableName):
+    dynamodb = open_db()
+    table = dynamodb.Table(tableName)
+    table.delete()
+
 def put_item(tableName, item):
     dynamodb = open_db()
     table = dynamodb.Table(tableName)
