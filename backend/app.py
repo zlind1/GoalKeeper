@@ -12,6 +12,8 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 
+import os
+
 import user
 import goal
 
@@ -79,4 +81,6 @@ def goals():
         return jsonify(response)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = port == 5000
+    app.run(host='0.0.0.0', port=port, debug=debug)
