@@ -13,6 +13,7 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 
 import user
+import goal
 
 app = Flask(__name__)
 CORS(app)
@@ -44,6 +45,36 @@ def signup():
     if response['msg'] == 'Signup success':
         return token_response(username)
     return jsonify(response), 401
+
+@app.route('/goals', methods=['GET', 'POST', 'PUT'])
+@jwt_required()
+def goals():
+    if request.method == 'GET':
+        username = get_jwt_identity()
+        user_goals = goal.get_user_goals(username)
+        return jsonify(user_goals)
+    elif request.method == 'POST':
+        username = get_jwt_identity()
+        title = request.json.get('title', None)
+        goal.create_goal(username, title)
+        response = {
+            'msg': 'Goal created'
+        }
+        return jsonify(response)
+    elif request.method == 'PUT':
+        username = get_jwt_identity()
+        goal_id = request.json.get('goal_id', None)
+        title = request.json.get('title', None)
+        completed = request.json.get('completed', None)
+        goal.update_goal(goal_id, {
+            'username': username,
+            'title': title,
+            'completed': completed
+        })
+        response = {
+            'msg': 'Goal updated'
+        }
+        return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)

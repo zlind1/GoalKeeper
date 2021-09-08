@@ -1,4 +1,5 @@
 import boto3
+from boto3.dynamodb.conditions import Attr
 
 endpoint_url = 'https://dynamodb.us-west-1.amazonaws.com'
 
@@ -44,3 +45,24 @@ def get_item(tableName, key):
     else:
         if 'Item' in response:
             return response['Item']
+
+def scan(tableName, scanKey):
+    dynamodb = open_db()
+    table = dynamodb.Table(tableName)
+    key = list(scanKey.keys())[0]
+    filterExpression = Attr(key).eq(scanKey[key])
+    return table.scan(FilterExpression=filterExpression)['Items']
+
+def update_item(tableName, key, newItem):
+    dynamodb = open_db()
+    table = dynamodb.Table(tableName)
+    updateExpression = 'SET'
+    expressionAttributeValues = {}
+    for i, attr in enumerate(newItem):
+        flag = f':attr{i}'
+        updateExpression += f' {attr} = {flag}'
+        expressionAttributeValues[flag] = newItem[attr]
+        if i < len(newItem.keys()) - 1:
+            updateExpression += ','
+    table.update_item(Key=key, UpdateExpression=updateExpression,
+        ExpressionAttributeValues=expressionAttributeValues)
