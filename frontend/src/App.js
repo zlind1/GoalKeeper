@@ -2,6 +2,7 @@ import React from 'react';
 import AppContext from './AppContext';
 import LoginModal from './components/LoginModal';
 import GoalList from './components/GoalList';
+import api from './util/api';
 
 function App() {
   const localData = (key) => {
@@ -23,9 +24,24 @@ function App() {
       }
     }
   }
+  const refresh = async () => {
+    const response = await api.get('/refresh', state.refreshToken[0]);
+    if (response.ok) {
+      await setData({
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token
+      });
+    } else {
+      await setData({
+        accessToken: null,
+        refreshToken: null
+      });
+    }
+  }
   const context = {
     accessToken: state.accessToken[0],
     refreshToken: state.refreshToken[0],
+    refresh: refresh,
     setData: setData
   }
   return (

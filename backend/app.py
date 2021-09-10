@@ -30,6 +30,12 @@ def token_response(identity):
     refresh_token = create_refresh_token(identity=identity)
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
+@app.route('/refresh', methods=['GET'])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    return token_response(identity)
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get('username', None)

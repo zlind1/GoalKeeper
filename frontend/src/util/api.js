@@ -1,5 +1,7 @@
 
-const endpointURL = 'https://zlind-goalkeeper.herokuapp.com';
+const inProduction = true;
+const endpointURL = inProduction ? 'https://zlind-goalkeeper.herokuapp.com'
+  : 'http://localhost:5000';
 
 const api = {
   get: async (route, token=null) => {

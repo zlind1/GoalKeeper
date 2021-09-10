@@ -7,37 +7,98 @@ import api from '../util/api';
 function GoalList() {
   const context = React.useContext(AppContext);
   const [goals, setGoals] = React.useState([]);
-  const newGoalInput = React.createRef();
+  const [loading, setLoading] = React.useState(false);
+  const [refreshToggle, setRefreshToggle] = React.useState(false);
+  const [needsReload, setNeedsReload] = React.useState(false);
+  const [needsAdd, setNeedsAdd] = React.useState(false);
+  const [needsUpdate, setNeedsUpdate] = React.useState(false);
+  const [newGoalInput, setNewGoalInput] = React.useState('');
+  const [goalToUpdate, setGoalToUpdate] = React.useState(null);
 
   const reloadGoals = async () => {
+    if (goals.length === 0) setLoading(true);
     const response = await api.get('/goals', context.accessToken);
-    console.log(response);
-    setGoals(response.goals);
+    if (response.ok) {
+      setGoals(response.goals);
+    } else {
+      await context.refresh();
+      setNeedsReload(true);
+      setRefreshToggle(!refreshToggle);
+    }
+    setLoading(false);
+  }
+
+  const updateNewGoalValue = (e) => {
+    setNewGoalInput(e.target.value);
   }
 
   const addGoal = async (e) => {
-    e.preventDefault();
+    if (e !== undefined) {
+      e.preventDefault();
+      if (newGoalInput === '') return;
+    }
     const newGoal = {
-      title: newGoalInput.current.value,
+      title: newGoalInput,
       completed: false
     }
-    await api.post('/goals', newGoal, context.accessToken);
-    reloadGoals();
-    newGoalInput.current.value = '';
+    const response = await api.post('/goals', newGoal, context.accessToken);
+    if (response.ok) {
+      reloadGoals();
+      setNewGoalInput('');
+    } else {
+      await context.refresh();
+      setNeedsAdd(true);
+      setRefreshToggle(!refreshToggle);
+    }
   }
 
   const updateGoal = async (goal) => {
-    delete goal.username;
-    await api.put('/goals', goal, context.accessToken);
-    reloadGoals();
+    if (goal !== undefined) {
+      delete goal.username;
+      await setGoalToUpdate(goal);
+      return;
+    }
+    if (goalToUpdate === null) return;
+    const response = await api.put('/goals', goalToUpdate, context.accessToken);
+    if (response.ok) {
+      reloadGoals();
+    } else {
+      await context.refresh();
+      setNeedsUpdate(true);
+      setRefreshToggle(!refreshToggle);
+    }
   }
+
+  React.useEffect(() => {
+    if (needsReload) {
+      reloadGoals();
+      setNeedsReload(false);
+    }
+    if (needsAdd) {
+      addGoal();
+      setNeedsAdd(false);
+    }
+    if (needsUpdate) {
+      updateGoal();
+      setNeedsUpdate(false);
+    }
+  }, [refreshToggle]);
 
   React.useEffect(() => {
     reloadGoals();
   }, []);
 
+  React.useEffect(() => {
+    updateGoal();
+  }, [goalToUpdate]);
+
   return (
     <ListGroup>
+      {loading && (
+        <ListGroup.Item>
+          <p>Loading...</p>
+        </ListGroup.Item>
+      )}
       {goals.map((goal, i) => (
         <ListGroup.Item key={i}>
           <Goal goal={goal} updateGoal={updateGoal}/>
@@ -45,7 +106,7 @@ function GoalList() {
       ))}
       <ListGroup.Item>
         <Form onSubmit={addGoal}>
-          <Form.Control placeholder='Add a new goal' ref={newGoalInput}/>
+          <Form.Control placeholder='Add a new goal' value={newGoalInput} onChange={updateNewGoalValue}/>
         </Form>
       </ListGroup.Item>
     </ListGroup>
