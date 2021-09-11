@@ -21,6 +21,10 @@ function GoalList() {
     if (goals.length === 0) setLoading(true);
     const response = await api.get('/goals', context.accessToken);
     if (response.ok) {
+      response.goals.sort((a, b) => {
+        if (a.timestamp === b.timestamp) return 0;
+        return new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1;
+      });
       setGoals(response.goals);
     } else {
       await context.refresh();

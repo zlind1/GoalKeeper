@@ -1,5 +1,6 @@
 import db
 import security
+from datetime import datetime
 
 tableName = 'Goals'
 
@@ -22,7 +23,8 @@ def create_goal(username, title):
         'goal_id': goal_id,
         'username': username,
         'title': title,
-        'completed': False
+        'completed': False,
+        'timestamp': str(datetime.now())
     })
 
 def get_user_goals(username):
