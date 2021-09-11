@@ -12,8 +12,10 @@ function GoalList() {
   const [needsReload, setNeedsReload] = React.useState(false);
   const [needsAdd, setNeedsAdd] = React.useState(false);
   const [needsUpdate, setNeedsUpdate] = React.useState(false);
+  const [needsDelete, setNeedsDelete] = React.useState(false);
   const [newGoalInput, setNewGoalInput] = React.useState('');
   const [goalToUpdate, setGoalToUpdate] = React.useState(null);
+  const [goalToDelete, setGoalToDelete] = React.useState(null);
 
   const reloadGoals = async () => {
     if (goals.length === 0) setLoading(true);
@@ -59,12 +61,30 @@ function GoalList() {
       return;
     }
     if (goalToUpdate === null) return;
-    const response = await api.put('/goals', goalToUpdate, context.accessToken);
+    const goalURL = `/goals/${goalToUpdate.goal_id}`;
+    const response = await api.put(goalURL, goalToUpdate, context.accessToken);
     if (response.ok) {
       reloadGoals();
     } else {
       await context.refresh();
       setNeedsUpdate(true);
+      setRefreshToggle(!refreshToggle);
+    }
+  }
+
+  const deleteGoal = async (goal) => {
+    if (goal !== undefined) {
+      await setGoalToDelete(goal);
+      return;
+    }
+    if (goalToDelete === null) return;
+    const goalURL = `/goals/${goalToDelete}`;
+    const response = await api.delete(goalURL, context.accessToken);
+    if (response.ok) {
+      reloadGoals();
+    } else {
+      await context.refresh();
+      setNeedsDelete(true);
       setRefreshToggle(!refreshToggle);
     }
   }
@@ -82,6 +102,10 @@ function GoalList() {
       updateGoal();
       setNeedsUpdate(false);
     }
+    if (needsDelete) {
+      deleteGoal();
+      setNeedsDelete(false);
+    }
   }, [refreshToggle]);
 
   React.useEffect(() => {
@@ -92,6 +116,10 @@ function GoalList() {
     updateGoal();
   }, [goalToUpdate]);
 
+  React.useEffect(() => {
+    deleteGoal();
+  }, [goalToDelete]);
+
   return (
     <ListGroup>
       {loading && (
@@ -101,12 +129,13 @@ function GoalList() {
       )}
       {goals.map((goal, i) => (
         <ListGroup.Item key={i}>
-          <Goal goal={goal} updateGoal={updateGoal}/>
+          <Goal goal={goal} updateGoal={updateGoal} deleteGoal={deleteGoal}/>
         </ListGroup.Item>
       ))}
       <ListGroup.Item>
         <Form onSubmit={addGoal}>
-          <Form.Control placeholder='Add a new goal' value={newGoalInput} onChange={updateNewGoalValue}/>
+          <Form.Control placeholder='Add a new goal' value={newGoalInput}
+            onChange={updateNewGoalValue}/>
         </Form>
       </ListGroup.Item>
     </ListGroup>

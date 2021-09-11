@@ -34,3 +34,9 @@ def update_goal(goal_id, newItem):
     db.update_item(tableName, {
         'goal_id': goal_id
     }, newItem)
+
+
+def delete_goal(goal_id):
+    db.delete_item(tableName, {
+        'goal_id': goal_id
+    })

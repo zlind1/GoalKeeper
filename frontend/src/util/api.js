@@ -63,6 +63,24 @@ const api = {
       response[key] = data[key];
     }
     return response;
+  },
+  delete: async (route, token=null) => {
+    const headers = {};
+    if (token !== null) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const apiResponse = await fetch(endpointURL+route, {
+      method: 'DELETE',
+      headers: headers
+    });
+    const response = {
+      ok: apiResponse.ok
+    }
+    const data = await apiResponse.json();
+    for (const key of Object.keys(data)) {
+      response[key] = data[key];
+    }
+    return response;
   }
 }
 

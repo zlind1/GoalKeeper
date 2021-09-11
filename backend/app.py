@@ -54,7 +54,7 @@ def signup():
         return token_response(username)
     return jsonify(response), 401
 
-@app.route('/goals', methods=['GET', 'POST', 'PUT'])
+@app.route('/goals', methods=['GET', 'POST'])
 @jwt_required()
 def goals():
     if request.method == 'GET':
@@ -71,9 +71,12 @@ def goals():
             'msg': 'Goal created'
         }
         return jsonify(response)
-    elif request.method == 'PUT':
+
+@app.route('/goals/<goal_id>', methods=['PUT', 'DELETE'])
+@jwt_required()
+def specificGoal(goal_id):
+    if request.method == 'PUT':
         username = get_jwt_identity()
-        goal_id = request.json.get('goal_id', None)
         title = request.json.get('title', None)
         completed = request.json.get('completed', None)
         goal.update_goal(goal_id, {
@@ -85,6 +88,14 @@ def goals():
             'msg': 'Goal updated'
         }
         return jsonify(response)
+    elif request.method == 'DELETE':
+        username = get_jwt_identity()
+        goal.delete_goal(goal_id)
+        response = {
+            'msg': 'Goal deleted'
+        }
+        return jsonify(response)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
