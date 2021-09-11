@@ -8,41 +8,36 @@ function GoalList() {
   const context = React.useContext(AppContext);
   const [goals, setGoals] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
-  const [refreshToggle, setRefreshToggle] = React.useState(false);
-  const [needsReload, setNeedsReload] = React.useState(false);
-  const [needsAdd, setNeedsAdd] = React.useState(false);
-  const [needsUpdate, setNeedsUpdate] = React.useState(false);
-  const [needsDelete, setNeedsDelete] = React.useState(false);
   const [newGoalInput, setNewGoalInput] = React.useState('');
-  const [goalToUpdate, setGoalToUpdate] = React.useState(null);
-  const [goalToDelete, setGoalToDelete] = React.useState(null);
 
-  const reloadGoals = async () => {
+  const reloadGoals = () => {
     if (goals.length === 0) setLoading(true);
-    const response = await api.get('/goals', context.accessToken);
-    if (response.ok) {
-      response.goals.sort((a, b) => {
-        if (a.timestamp === b.timestamp) return 0;
-        return new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1;
-      });
-      setGoals(response.goals);
-    } else {
-      await context.refresh();
-      setNeedsReload(true);
-      setRefreshToggle(!refreshToggle);
-    }
-    setLoading(false);
+    api.get('/goals', context.accessToken).then(response => {
+      if (response.ok) {
+        response.goals.sort((a, b) => {
+          if (a.timestamp === b.timestamp) return 0;
+          return new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1;
+        });
+        setGoals(response.goals);
+        setLoading(false);
+      } else {
+        context.refresh();
+      }
+    })
   }
 
   const updateNewGoalValue = (e) => {
     setNewGoalInput(e.target.value);
   }
 
+  const openRefreshModal = () => {
+    console.log('refreshModal')
+    alert('Session expired. Refresh page');
+  }
+
   const addGoal = async (e) => {
-    if (e !== undefined) {
-      e.preventDefault();
-      if (newGoalInput === '') return;
-    }
+    e.preventDefault();
+    if (newGoalInput === '') return;
     const newGoal = {
       title: newGoalInput,
       completed: false
@@ -53,82 +48,45 @@ function GoalList() {
       setNewGoalInput('');
     } else {
       await context.refresh();
-      setNeedsAdd(true);
-      setRefreshToggle(!refreshToggle);
+      openRefreshModal();
     }
   }
 
   const updateGoal = async (goal) => {
-    if (goal !== undefined) {
-      delete goal.username;
-      await setGoalToUpdate(goal);
-      return;
-    }
-    if (goalToUpdate === null) return;
-    const goalURL = `/goals/${goalToUpdate.goal_id}`;
-    const response = await api.put(goalURL, goalToUpdate, context.accessToken);
+    delete goal.username;
+    const goalURL = `/goals/${goal.goal_id}`;
+    const response = await api.put(goalURL, goal, context.accessToken);
     if (response.ok) {
       reloadGoals();
     } else {
       await context.refresh();
-      setNeedsUpdate(true);
-      setRefreshToggle(!refreshToggle);
+      openRefreshModal();
     }
   }
 
-  const deleteGoal = async (goal) => {
-    if (goal !== undefined) {
-      await setGoalToDelete(goal);
-      return;
-    }
-    if (goalToDelete === null) return;
-    const goalURL = `/goals/${goalToDelete}`;
+  const deleteGoal = async (goal_id) => {
+    const goalURL = `/goals/${goal_id}`;
     const response = await api.delete(goalURL, context.accessToken);
     if (response.ok) {
       reloadGoals();
     } else {
       await context.refresh();
-      setNeedsDelete(true);
-      setRefreshToggle(!refreshToggle);
+      openRefreshModal();
     }
   }
 
-  React.useEffect(() => {
-    if (needsReload) {
-      reloadGoals();
-      setNeedsReload(false);
-    }
-    if (needsAdd) {
-      addGoal();
-      setNeedsAdd(false);
-    }
-    if (needsUpdate) {
-      updateGoal();
-      setNeedsUpdate(false);
-    }
-    if (needsDelete) {
-      deleteGoal();
-      setNeedsDelete(false);
-    }
-  }, [refreshToggle]);
-
-  React.useEffect(() => {
-    reloadGoals();
-  }, []);
-
-  React.useEffect(() => {
-    updateGoal();
-  }, [goalToUpdate]);
-
-  React.useEffect(() => {
-    deleteGoal();
-  }, [goalToDelete]);
+  React.useEffect(reloadGoals, [context, goals.length]);
 
   return (
     <ListGroup>
       {loading && (
         <ListGroup.Item>
           <p>Loading...</p>
+        </ListGroup.Item>
+      )}
+      {(!loading && goals.length === 0) && (
+        <ListGroup.Item>
+          <p>No goals</p>
         </ListGroup.Item>
       )}
       {goals.map((goal, i) => (
