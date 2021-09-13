@@ -65,6 +65,8 @@ function GoalList() {
   }
 
   const deleteGoal = async (goal_id) => {
+    const confirmation = window.confirm('Are you sure you want to delete this goal?');
+    if (!confirmation) return;
     const goalURL = `/goals/${goal_id}`;
     const response = await api.delete(goalURL, context.accessToken);
     if (response.ok) {
