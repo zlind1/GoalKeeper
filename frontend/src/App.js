@@ -1,7 +1,7 @@
 import React from 'react';
 import AppContext from './AppContext';
-import LoginModal from './components/LoginModal';
 import GoalList from './components/GoalList';
+import Header from './components/Header';
 import api from './util/api';
 
 function App() {
@@ -46,7 +46,7 @@ function App() {
   }
   return (
     <AppContext.Provider value={context}>
-      <LoginModal/>
+      <Header/>
       {context.accessToken && <GoalList/>}
     </AppContext.Provider>
   );

@@ -1,17 +1,19 @@
 import React from 'react';
 import { Form } from 'react-bootstrap';
-import { MdEdit, MdCancel, MdDelete } from 'react-icons/md';
+import { FiEdit3, FiTrash } from 'react-icons/fi';
+import { ImCancelCircle } from 'react-icons/im';
 
 function Goal(props) {
   const {goal, updateGoal, deleteGoal} = props;
 
   const [editMode, setEditMode] = React.useState(false);
+  const [goalChecked, setGoalChecked] = React.useState(goal.completed);
 
   const goalRef = React.createRef();
 
   const toggleCompleted = () => {
+    setGoalChecked(!goalChecked);
     goal.completed = !goal.completed;
-    console.log('changed goal.completed');
     updateGoal(goal);
   }
 
@@ -19,8 +21,11 @@ function Goal(props) {
     e.preventDefault();
     if (!editMode) return;
     goal.title = goalRef.current.value;
-    console.log('changed goal.title');
     updateGoal(goal);
+    setEditMode(false);
+  }
+
+  const stopEditing = () => {
     setEditMode(false);
   }
 
@@ -33,12 +38,12 @@ function Goal(props) {
 
   return (
     <div className='d-flex'>
-      <Form.Check inline checked={goal.completed} className='mx-2'
+      <Form.Check inline checked={goalChecked} className='mx-2'
         onChange={toggleCompleted}/>
       <div className='flex-grow-1'>
         {editMode ? (
           <Form onSubmit={updateTitle}>
-            <Form.Control ref={goalRef} className='px-1 py-0'/>
+            <Form.Control ref={goalRef} className='px-1 py-0' onBlur={stopEditing}/>
           </Form>
         ) : (
           <span className={goal.completed ? 'text-decoration-line-through' : ''}>
@@ -48,11 +53,11 @@ function Goal(props) {
       </div>
       <div className='mx-3'>
         {editMode ? (
-          <MdCancel size={25} className='mx-2' onClick={() => setEditMode(false)}/>
+          <ImCancelCircle size={25} className='mx-2' onClick={stopEditing}/>
         ) : (
-          <MdEdit size={25} className='mx-2' onClick={() => setEditMode(true)}/>
+          <FiEdit3 size={25} className='mx-2' onClick={() => setEditMode(true)}/>
         )}
-        <MdDelete size={25} onClick={() => deleteGoal(goal.goal_id)}/>
+        <FiTrash size={25} onClick={() => deleteGoal(goal.goal_id)}/>
       </div>
     </div>
   );
