@@ -1,15 +1,19 @@
 import React from 'react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom';
 import { AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai';
 import AppContext from '../AppContext';
 import api from '../util/api';
 
 function LoginForm(props) {
   const {closeModal, newUser} = props;
+  const history = useHistory();
+  const [focusToggle, setFocusToggle] = React.useState(false);
 
   const context = React.useContext(AppContext);
   const login = (tokens) => {
     context.setData(tokens);
+    history.push('/goals');
   }
 
   const [passwordShown, setPasswordShown] = React.useState(false);
@@ -17,11 +21,12 @@ function LoginForm(props) {
 
   const username = React.createRef();
   const password = React.createRef();
-  const focusUsername = () => {
-    username.current.focus();
-  }
-  const focusPassword = () => {
-    password.current.focus();
+  const refocus = () => {
+    if (usernameError || !passwordError) {
+      username.current.focus();
+    } else {
+      password.current.focus();
+    }
   }
 
   const [usernameError, setUsernameError] = React.useState('');
@@ -41,17 +46,12 @@ function LoginForm(props) {
       setPasswordError('This field is required');
       errorOccurred = true;
     }
+    setFocusToggle(!focusToggle);
     return errorOccurred;
   }
 
   React.useEffect(resetErrors, [newUser]);
-  React.useEffect(() => {
-    if (usernameError) focusUsername();
-  }, [usernameError]);
-  React.useEffect(() => {
-    if (passwordError) focusPassword();
-  }, [passwordError]);
-  React.useEffect(focusUsername, [username]);
+  React.useEffect(refocus, [focusToggle, username, password, usernameError, passwordError]);
 
   const submitForm = async (e) => {
     e.preventDefault();
@@ -75,6 +75,7 @@ function LoginForm(props) {
         if (response.msg === 'Username taken') {
           setUsernameError(response.msg);
         }
+        setFocusToggle(!focusToggle);
       }
     } else {
       const response = await api.post('/login', user);
@@ -91,6 +92,7 @@ function LoginForm(props) {
         } else if (response.msg === 'Incorrect password') {
           setPasswordError(response.msg);
         }
+        setFocusToggle(!focusToggle);
       }
     }
   }

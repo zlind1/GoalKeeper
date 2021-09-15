@@ -1,7 +1,9 @@
 import React from 'react';
 import { ListGroup, Form } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom';
 import AppContext from '../AppContext';
 import Goal from './Goal';
+import LoadingSpinner from './LoadingSpinner';
 import api from '../util/api';
 
 function GoalList() {
@@ -9,8 +11,13 @@ function GoalList() {
   const [goals, setGoals] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [newGoalInput, setNewGoalInput] = React.useState('');
+  const history = useHistory();
 
   const reloadGoals = () => {
+    if (context.accessToken === null) {
+      history.push('/');
+      return;
+    }
     if (goals.length === 0) setLoading(true);
     api.get('/goals', context.accessToken).then(response => {
       if (response.ok) {
@@ -77,18 +84,18 @@ function GoalList() {
     }
   }
 
-  React.useEffect(reloadGoals, [context, goals.length]);
+  React.useEffect(reloadGoals, [context, goals.length, history]);
 
-  return (
+  return <>
     <ListGroup>
       {loading && (
         <ListGroup.Item>
-          <p>Loading...</p>
+          <LoadingSpinner/>
         </ListGroup.Item>
       )}
       {(!loading && goals.length === 0) && (
         <ListGroup.Item>
-          <p>No goals</p>
+          <span>No goals</span>
         </ListGroup.Item>
       )}
       {goals.map((goal, i) => (
@@ -96,14 +103,12 @@ function GoalList() {
           <Goal goal={goal} updateGoal={updateGoal} deleteGoal={deleteGoal}/>
         </ListGroup.Item>
       ))}
-      <ListGroup.Item>
-        <Form onSubmit={addGoal}>
-          <Form.Control placeholder='Add a new goal' value={newGoalInput}
-            onChange={updateNewGoalValue}/>
-        </Form>
-      </ListGroup.Item>
     </ListGroup>
-  )
+    <Form onSubmit={addGoal}>
+      <Form.Control placeholder='Add a new goal' value={newGoalInput}
+        onChange={updateNewGoalValue}/>
+    </Form>
+  </>
 }
 
 export default GoalList;

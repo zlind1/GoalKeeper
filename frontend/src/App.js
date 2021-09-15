@@ -1,7 +1,10 @@
 import React from 'react';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import AppContext from './AppContext';
 import GoalList from './components/GoalList';
 import Header from './components/Header';
+import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import api from './util/api';
 
 function App() {
@@ -46,8 +49,14 @@ function App() {
   }
   return (
     <AppContext.Provider value={context}>
-      <Header/>
-      {context.accessToken && <GoalList/>}
+      <BrowserRouter>
+        <Header/>
+        <Switch>
+          <Route exact path='/' component={HomePage}/>
+          <Route exact path='/goals' component={GoalList}/>
+          <Route component={NotFoundPage}/>
+        </Switch>
+      </BrowserRouter>
     </AppContext.Provider>
   );
 }
