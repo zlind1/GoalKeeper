@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai';
 import AppContext from '../AppContext';
 import api from '../util/api';
+import LoadingSpinner from './LoadingSpinner';
 
 function LoginForm(props) {
   const {closeModal, newUser} = props;
@@ -15,6 +16,8 @@ function LoginForm(props) {
     context.setData(tokens);
     history.push('/goals');
   }
+
+  const [loading, setLoading] = React.useState(false);
 
   const [passwordShown, setPasswordShown] = React.useState(false);
   const togglePasswordShown = () => setPasswordShown(!passwordShown);
@@ -62,6 +65,7 @@ function LoginForm(props) {
       username: usernameValue,
       password: passwordValue
     };
+    setLoading(true);
     if (newUser) {
       const response = await api.post('/signup', user);
       if (response.ok) {
@@ -95,6 +99,7 @@ function LoginForm(props) {
         setFocusToggle(!focusToggle);
       }
     }
+    setLoading(false);
   }
 
   return (
@@ -123,7 +128,11 @@ function LoginForm(props) {
       </Form.Group>
       <div className='d-grid mt-4'>
         <Button type='submit'>
-          {newUser ? 'Sign up' : 'Log in'}
+          {loading ? (
+            <LoadingSpinner/>
+          ) : (
+            newUser ? 'Sign up' : 'Log in'
+          )}
         </Button>
       </div>
     </Form>

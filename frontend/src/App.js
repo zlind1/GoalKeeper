@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import AppContext from './AppContext';
-import GoalList from './components/GoalList';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
+import GoalsPage from './pages/GoalsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AboutUs from './pages/AboutUs';
 import api from './util/api';
 
 function App() {
@@ -53,7 +54,8 @@ function App() {
         <Header/>
         <Switch>
           <Route exact path='/' component={HomePage}/>
-          <Route exact path='/goals' component={GoalList}/>
+          <Route exact path='/about' component={AboutUs}/>
+          <Route exact path='/goals' component={GoalsPage}/>
           <Route component={NotFoundPage}/>
         </Switch>
       </BrowserRouter>

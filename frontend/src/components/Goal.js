@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form } from 'react-bootstrap';
+import { Row, Col, Form } from 'react-bootstrap';
 import { FiEdit3, FiTrash } from 'react-icons/fi';
 import { ImCancelCircle } from 'react-icons/im';
 
@@ -17,14 +17,6 @@ function Goal(props) {
     updateGoal(goal);
   }
 
-  const updateTitle = (e) => {
-    e.preventDefault();
-    if (!editMode) return;
-    goal.title = goalRef.current.value;
-    updateGoal(goal);
-    setEditMode(false);
-  }
-
   const stopEditing = () => {
     setEditMode(false);
   }
@@ -33,33 +25,57 @@ function Goal(props) {
     if (editMode) {
       goalRef.current.value = goal.title;
       goalRef.current.focus();
+      goalRef.current.onblur = stopEditing;
+      goalRef.current.onkeypress = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          goal.title = goalRef.current.value;
+          updateGoal(goal);
+          setEditMode(false);
+        }
+      }
+      const resizeTextArea = () => {
+        goalRef.current.style.height = 'auto';
+        goalRef.current.style.height = `${goalRef.current.scrollHeight}px`;
+      }
+      window.onresize = resizeTextArea;
+      goalRef.current.oninput = resizeTextArea;
+      resizeTextArea();
+    } else {
+      window.onresize = null;
     }
-  }, [editMode, goal.title, goalRef]);
+  }, [editMode, goal, goalRef, updateGoal]);
 
   return (
-    <div className='d-flex'>
-      <Form.Check inline checked={goalChecked} className='mx-2'
-        onChange={toggleCompleted}/>
-      <div className='flex-grow-1'>
-        {editMode ? (
-          <Form onSubmit={updateTitle}>
-            <Form.Control ref={goalRef} className='px-1 py-0' onBlur={stopEditing}/>
-          </Form>
-        ) : (
-          <span className={goal.completed ? 'text-decoration-line-through' : ''}>
-            {goal.title}
-          </span>
-        )}
-      </div>
-      <div className='mx-3'>
-        {editMode ? (
-          <ImCancelCircle size={25} className='mx-2' onClick={stopEditing}/>
-        ) : (
-          <FiEdit3 size={25} className='mx-2' onClick={() => setEditMode(true)}/>
-        )}
-        <FiTrash size={25} onClick={() => deleteGoal(goal.goal_id)}/>
-      </div>
-    </div>
+    <Row>
+      <Col xs={9}>
+        <div className='d-flex w-100'>
+          <Form.Check inline checked={goalChecked} className='mx-2'
+            onChange={toggleCompleted}/>
+          <div className='flex-grow-1'>
+            {editMode ? (
+              <Form.Control ref={goalRef} className='p-0' as='textarea' rows={1}
+                style={{resize: 'none'}}/>
+            ) : (
+              <span className={goal.completed ? 'text-decoration-line-through' : ''}>
+                {goal.title}
+              </span>
+            )}
+          </div>
+        </div>
+
+      </Col>
+      <Col xs={3}>
+        <div className='d-flex justify-content-end'>
+          {editMode ? (
+            <ImCancelCircle size={25} onClick={stopEditing}/>
+          ) : (
+            <FiEdit3 size={25} onClick={() => setEditMode(true)}/>
+          )}
+          <FiTrash size={25} onClick={() => deleteGoal(goal.goal_id)}/>
+        </div>
+      </Col>
+    </Row>
   );
 }
 
