@@ -5,7 +5,6 @@ import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import GoalsPage from './pages/GoalsPage';
 import NotFoundPage from './pages/NotFoundPage';
-import AboutUs from './pages/AboutUs';
 import api from './util/api';
 
 function App() {
@@ -54,7 +53,6 @@ function App() {
         <Header/>
         <Switch>
           <Route exact path='/' component={HomePage}/>
-          <Route exact path='/about' component={AboutUs}/>
           <Route exact path='/goals' component={GoalsPage}/>
           <Route component={NotFoundPage}/>
         </Switch>

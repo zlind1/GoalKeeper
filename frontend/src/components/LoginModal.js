@@ -22,9 +22,11 @@ function LoginModal() {
 
   return (
     <>
-      <Button onClick={context.accessToken ? signout : openModal}>
-        {context.accessToken ? 'Sign out' : 'Log in / Sign up'}
-      </Button>
+      <div className='d-grid d-md-block'>
+        <Button onClick={context.accessToken ? signout : openModal}>
+          {context.accessToken ? 'Sign out' : 'Log in / Sign up'}
+        </Button>
+      </div>
       <Modal show={modalShown} onHide={closeModal}>
         <Modal.Header closeButton>
           <Modal.Title>{newUser ? 'Sign up' : 'Log in'}</Modal.Title>
